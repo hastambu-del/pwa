@@ -4,681 +4,563 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#2563eb">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="Калькулятор">
+  <title>Калькулятор рассрочки — ЖК ХАСТАМБУ</title>
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon-192.png">
-  <link rel="icon" type="image/png" href="icon-192.png">
-  <title>Калькулятор рассрочки — для риелторов</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: #f0f4f8;
-      color: #1a1a1a;
+      color: #1a202c;
       min-height: 100vh;
-      padding: 16px;
-      max-width: 480px;
-      margin: 0 auto;
     }
 
-    /* === Экран активации === */
+    /* ---- Экран активации ---- */
     #activation-screen {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-height: 90vh;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .activation-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 32px 24px;
+      max-width: 380px;
+      width: 100%;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
       text-align: center;
     }
-
-    #activation-screen h1 {
-      font-size: 24px;
+    .activation-card h1 {
+      font-size: 22px;
       margin-bottom: 8px;
-      color: #2563eb;
     }
-
-    #activation-screen p {
+    .activation-card p {
       font-size: 14px;
       color: #666;
       margin-bottom: 24px;
       line-height: 1.5;
     }
-
-    #activation-input {
+    .activation-card input {
       width: 100%;
-      max-width: 320px;
       padding: 14px 16px;
-      font-size: 16px;
-      border: 2px solid #ddd;
+      border: 2px solid #e2e8f0;
       border-radius: 10px;
-      text-align: center;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 12px;
-    }
-
-    #activation-input:focus {
-      outline: none;
-      border-color: #2563eb;
-    }
-
-    #activation-btn {
-      width: 100%;
-      max-width: 320px;
-      padding: 14px;
       font-size: 16px;
+      text-align: center;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .activation-card input:focus { border-color: #2563eb; }
+    .activation-card button {
+      width: 100%;
+      padding: 14px;
       background: #2563eb;
       color: #fff;
       border: none;
       border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
       cursor: pointer;
       transition: background 0.2s;
     }
-
-    #activation-btn:active { background: #1d4ed8; }
-    #activation-btn:disabled { background: #aaa; cursor: not-allowed; }
-
-    #activation-error {
+    .activation-card button:active { background: #1d4ed8; }
+    .activation-card .hint {
+      margin-top: 20px;
+      font-size: 13px;
+      color: #999;
+    }
+    .activation-card .hint code {
+      background: #f1f5f9;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      color: #2563eb;
+    }
+    .activation-error {
       color: #dc2626;
       font-size: 14px;
       margin-top: 12px;
-      min-height: 20px;
+      display: none;
     }
 
-    .demo-info {
-      margin-top: 32px;
-      font-size: 13px;
-      color: #999;
-      line-height: 1.6;
-    }
-
-    /* === Основной экран (калькулятор) === */
+    /* ---- Основное приложение ---- */
     #app-screen { display: none; }
+    #app-screen.active { display: block; }
 
-    .app-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
+    .header {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: #fff;
+      padding: 16px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
-
-    .app-header h1 {
-      font-size: 20px;
-      color: #1a1a1a;
-    }
-
-    .subscription-info {
+    .header h1 { font-size: 18px; font-weight: 600; }
+    .header .sub { font-size: 12px; opacity: 0.85; margin-top: 2px; }
+    .header .user-info {
+      float: right;
       font-size: 12px;
-      color: #666;
-      background: #e0f0ff;
-      padding: 4px 10px;
-      border-radius: 6px;
+      opacity: 0.85;
+      text-align: right;
     }
 
-    /* Блок обновления условий */
-    .refresh-block {
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      padding-bottom: 100px;
+    }
+
+    /* ---- Кнопка обновления ---- */
+    .refresh-bar {
       display: flex;
       align-items: center;
       gap: 12px;
-      margin-bottom: 20px;
-      padding: 12px;
       background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     }
-
     #btn-refresh {
       background: #f59e0b;
       color: #fff;
       border: none;
-      padding: 10px 16px;
+      padding: 10px 18px;
       border-radius: 8px;
       font-size: 14px;
+      font-weight: 600;
       cursor: pointer;
       white-space: nowrap;
-      transition: background 0.2s;
+      transition: background 0.2s, transform 0.1s;
     }
-
-    #btn-refresh:active { background: #d97706; }
+    #btn-refresh:active { transform: scale(0.97); }
     #btn-refresh:disabled { background: #d1d5db; cursor: not-allowed; }
-
-    .refresh-hint {
+    .refresh-bar .hint-text {
       font-size: 12px;
-      color: #666;
+      color: #6b7280;
       line-height: 1.4;
     }
 
-    /* Форма калькулятора */
-    .calc-form {
+    /* ---- Баннер обновления ---- */
+    .update-banner {
+      display: none;
+      background: #ecfdf5;
+      border: 1px solid #6ee7b7;
+      color: #065f46;
+      padding: 12px 16px;
+      border-radius: 10px;
+      margin-bottom: 16px;
+      font-size: 14px;
+      font-weight: 500;
+      text-align: center;
+    }
+    .update-banner.show { display: block; }
+
+    /* ---- Форма калькулятора ---- */
+    .calc-card {
       background: #fff;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+      border-radius: 16px;
+      padding: 24px 20px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
       margin-bottom: 20px;
     }
-
-    .form-group {
-      margin-bottom: 16px;
+    .calc-card h2 {
+      font-size: 16px;
+      margin-bottom: 20px;
+      color: #374151;
     }
-
+    .form-group { margin-bottom: 18px; }
     .form-group label {
       display: block;
       font-size: 14px;
-      font-weight: 600;
-      color: #374151;
+      font-weight: 500;
+      color: #4b5563;
       margin-bottom: 6px;
     }
-
     .form-group select,
     .form-group input {
       width: 100%;
-      padding: 12px;
-      font-size: 16px;
+      padding: 12px 14px;
       border: 2px solid #e5e7eb;
-      border-radius: 8px;
-    }
-
-    .form-group select:focus,
-    .form-group input:focus {
-      outline: none;
-      border-color: #2563eb;
-    }
-
-    #btn-calculate {
-      width: 100%;
-      padding: 14px;
+      border-radius: 10px;
       font-size: 16px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-group select:focus,
+    .form-group input:focus { border-color: #2563eb; }
+    #btn-calc {
+      width: 100%;
+      padding: 15px;
       background: #2563eb;
       color: #fff;
       border: none;
       border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
       cursor: pointer;
       margin-top: 8px;
       transition: background 0.2s;
     }
+    #btn-calc:active { background: #1d4ed8; }
 
-    #btn-calculate:active { background: #1d4ed8; }
-
-    /* Результат */
+    /* ---- Результат ---- */
     .result-card {
-      background: #fff;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-      margin-bottom: 20px;
       display: none;
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: #fff;
+      border-radius: 16px;
+      padding: 24px 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 20px rgba(37,99,235,0.3);
     }
-
-    .result-card h2 {
-      font-size: 16px;
-      color: #6b7280;
-      margin-bottom: 12px;
-      font-weight: 600;
+    .result-card.show { display: block; }
+    .result-card .label { font-size: 13px; opacity: 0.85; margin-bottom: 6px; }
+    .result-card .big-value { font-size: 32px; font-weight: 700; margin-bottom: 4px; }
+    .result-card .sub-value { font-size: 14px; opacity: 0.9; }
+    .result-card hr {
+      border: none;
+      border-top: 1px solid rgba(255,255,255,0.2);
+      margin: 16px 0;
     }
-
-    .result-row {
+    .result-card .row {
       display: flex;
       justify-content: space-between;
-      align-items: baseline;
-      padding: 8px 0;
-      border-bottom: 1px solid #f3f4f6;
-      font-size: 15px;
+      font-size: 14px;
+      margin-bottom: 8px;
     }
+    .result-card .row .val { font-weight: 600; }
 
-    .result-row:last-child { border-bottom: none; }
-
-    .result-row .label { color: #6b7280; }
-    .result-row .value { font-weight: 700; color: #1a1a1a; }
-
-    .result-highlight {
-      background: #eff6ff;
-      border-radius: 10px;
-      padding: 16px;
-      margin-top: 12px;
-      text-align: center;
-    }
-
-    .result-highlight .label {
-      font-size: 13px;
-      color: #6b7280;
-      margin-bottom: 4px;
-    }
-
-    .result-highlight .value {
-      font-size: 28px;
-      font-weight: 800;
-      color: #2563eb;
-    }
-
-    /* Напоминалка внизу */
+    /* ---- Напоминалка внизу ---- */
     .reminder {
       text-align: center;
       font-size: 13px;
       color: #9ca3af;
-      padding: 16px;
       line-height: 1.5;
+      padding: 16px;
+      margin-top: 8px;
     }
-
     .reminder strong { color: #6b7280; }
 
-    /* Кнопка выхода */
-    .logout-btn {
-      display: block;
-      margin: 24px auto 0;
-      font-size: 13px;
-      color: #999;
-      background: none;
-      border: none;
-      cursor: pointer;
-      text-decoration: underline;
-    }
-
-    /* Toast-уведомление */
+    /* ---- Toast ---- */
     #toast {
       position: fixed;
-      bottom: 80px;
+      bottom: 24px;
       left: 50%;
-      transform: translateX(-50%) translateY(20px);
+      transform: translateX(-50%) translateY(100px);
       background: #1f2937;
       color: #fff;
       padding: 12px 20px;
-      border-radius: 10px;
+      border-radius: 12px;
       font-size: 14px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
       z-index: 9999;
       opacity: 0;
-      pointer-events: none;
       transition: opacity 0.3s, transform 0.3s;
-      max-width: 340px;
+      max-width: 90%;
       text-align: center;
     }
-
     #toast.show {
       opacity: 1;
       transform: translateX(-50%) translateY(0);
     }
-
-    #toast.success { background: #059669; }
-    #toast.error { background: #dc2626; }
-    #toast.warning { background: #d97706; }
   </style>
 </head>
 <body>
 
-  <!-- ===================== ЭКРАН АКТИВАЦИИ ===================== -->
+  <!-- ============ ЭКРАН АКТИВАЦИИ ============ -->
   <div id="activation-screen">
-    <h1>🔑 Калькулятор рассрочки</h1>
-    <p>Инструмент для риелторов.<br>Введите ключ доступа для активации.</p>
-
-    <input type="text" id="activation-input" placeholder="Введите ключ доступа" autocomplete="off">
-    <button id="activation-btn" onclick="activateKey()">Активировать</button>
-    <div id="activation-error"></div>
-
-    <div class="demo-info">
-      Тестовый ключ: <strong>HASTAMBU-DEMO-2026</strong><br>
-      Для покупки подписки свяжитесь с администратором
+    <div class="activation-card">
+      <h1>Калькулятор рассрочки</h1>
+      <p>Введите ключ доступа, чтобы открыть калькулятор.</p>
+      <input type="text" id="key-input" placeholder="Введите ключ доступа" autocomplete="off">
+      <button onclick="activateKey()">Активировать</button>
+      <div class="activation-error" id="activation-error"></div>
+      <div class="hint">
+        Демо-ключ: <code>HASTAMBU-DEMO-2026</code>
+      </div>
     </div>
   </div>
 
-  <!-- ===================== ОСНОВНОЙ ЭКРАН ===================== -->
+  <!-- ============ ОСНОВНОЕ ПРИЛОЖЕНИЕ ============ -->
   <div id="app-screen">
-
-    <div class="app-header">
+    <div class="header">
       <h1>Калькулятор рассрочки</h1>
-      <span class="subscription-info" id="sub-info">—</span>
+      <div class="sub">Профессиональный инструмент для риелторов</div>
+      <div class="user-info" id="user-info"></div>
     </div>
 
-    <!-- Кнопка обновления условий -->
-    <div class="refresh-block">
-      <button id="btn-refresh" onclick="forceRefreshData()">🔄 Обновить условия</button>
-      <span class="refresh-hint">Проверяет актуальные цены и тарифы застройщиков</span>
-    </div>
+    <div class="container">
 
-    <!-- Форма калькулятора -->
-    <div class="calc-form">
-      <div class="form-group">
-        <label for="select-complex">Жилой комплекс</label>
-        <select id="select-complex" onchange="onComplexChange()">
-          <option value="">— Выбрать ЖК —</option>
-        </select>
+      <!-- Кнопка обновления -->
+      <div class="refresh-bar">
+        <button id="btn-refresh" onclick="forceRefreshData()">Обновить условия</button>
+        <div class="hint-text">Проверить актуальные цены и условия застройщиков</div>
       </div>
 
-      <div class="form-group">
-        <label for="input-area">Площадь квартиры (м²)</label>
-        <input type="number" id="input-area" placeholder="Например: 60" min="1" step="0.1">
+      <!-- Баннер обновления -->
+      <div class="update-banner" id="update-banner"></div>
+
+      <!-- Форма калькулятора -->
+      <div class="calc-card">
+        <h2>Расчёт стоимости квартиры</h2>
+        <div class="form-group">
+          <label for="complex-select">Жилой комплекс</label>
+          <select id="complex-select"></select>
+        </div>
+        <div class="form-group">
+          <label for="area-input">Площадь квартиры, м²</label>
+          <input type="number" id="area-input" placeholder="Например: 60" min="10" max="500" step="0.1">
+        </div>
+        <button id="btn-calc" onclick="calculate()">Рассчитать</button>
       </div>
 
-      <button id="btn-calculate" onclick="calculate()">Рассчитать</button>
-    </div>
+      <!-- Результат -->
+      <div class="result-card" id="result-card">
+        <div class="label">Стоимость квартиры</div>
+        <div class="big-value" id="result-price">—</div>
+        <div class="sub-value" id="result-per-sqm">—</div>
+        <hr>
+        <div class="row">
+          <span>ЖК</span>
+          <span class="val" id="result-complex">—</span>
+        </div>
+        <div class="row">
+          <span>Площадь</span>
+          <span class="val" id="result-area">—</span>
+        </div>
+        <div class="row">
+          <span>Цена за м²</span>
+          <span class="val" id="result-base-price">—</span>
+        </div>
+        <hr>
+        <div class="row">
+          <span>Версия данных</span>
+          <span class="val" id="result-version">—</span>
+        </div>
+      </div>
 
-    <!-- Результат -->
-    <div class="result-card" id="result-card">
-      <h2 id="result-title">Результат расчёта</h2>
-      <div id="result-body"></div>
-    </div>
+      <!-- Напоминалка -->
+      <div class="reminder">
+        <strong>Условия застройщиков обновляются ежедневно.</strong><br>
+        Перед каждым расчётом нажимайте «Обновить условия», чтобы получить актуальные цены.
+      </div>
 
-    <!-- Напоминалка -->
-    <div class="reminder">
-      <strong>⚠️ Условия застройщиков обновляются ежедневно</strong><br>
-      Перед каждым расчётом нажимайте «Обновить условия»,<br>чтобы видеть актуальные цены и тарифы.
     </div>
-
-    <button class="logout-btn" onclick="logout()">Выйти / Сменить ключ</button>
   </div>
 
   <!-- Toast -->
   <div id="toast"></div>
 
   <script>
-    // ==========================================
-    //  Глобальные переменные
-    // ==========================================
-    let appData = null;       // данные из data.json
-    let activeKey = null;      // активный ключ из keys.json
+    var hastambuData = null;
+    var accessInfo = null;
 
-    // ==========================================
-    //  Toast (всплывающее уведомление)
-    // ==========================================
-    function showToast(message, type = '') {
-      const toast = document.getElementById('toast');
-      toast.textContent = message;
-      toast.className = '';
-      if (type) toast.classList.add(type);
-      toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 3500);
-    }
-
-    // ==========================================
-    //  Загрузка data.json (с обходом кэша)
-    // ==========================================
-    async function fetchData() {
-      const resp = await fetch('data.json?t=' + Date.now());
-      if (!resp.ok) throw new Error('Не удалось загрузить data.json');
-      return resp.json();
-    }
-
-    // ==========================================
-    //  Загрузка keys.json (с обходом кэша)
-    // ==========================================
-    async function fetchKeys() {
-      const resp = await fetch('keys.json?t=' + Date.now());
-      if (!resp.ok) throw new Error('Не удалось загрузить keys.json');
-      return resp.json();
-    }
-
-    // ==========================================
-    //  Проверка срока действия ключа
-    // ==========================================
-    function isKeyValid(keyEntry) {
-      if (!keyEntry || !keyEntry.expires) return false;
-      const expires = new Date(keyEntry.expires);
-      const now = new Date();
-      return expires > now;
-    }
-
-    function formatDateRu(dateStr) {
-      const d = new Date(dateStr);
-      return d.toLocaleDateString('ru-RU', { day: '2-digit', month: 'long', year: 'numeric' });
-    }
-
-    // ==========================================
-    //  АКТИВАЦИЯ КЛЮЧА
-    // ==========================================
+    // ============ АКТИВАЦИЯ ============
     async function activateKey() {
-      const input = document.getElementById('activation-input');
-      const btn = document.getElementById('activation-btn');
-      const errEl = document.getElementById('activation-error');
-      const code = input.value.trim().toUpperCase();
+      var key = document.getElementById('key-input').value.trim().toUpperCase();
+      var errEl = document.getElementById('activation-error');
+      errEl.style.display = 'none';
 
-      errEl.textContent = '';
-      if (!code) {
+      if (!key) {
         errEl.textContent = 'Введите ключ доступа';
+        errEl.style.display = 'block';
         return;
       }
 
-      btn.disabled = true;
-      btn.textContent = 'Проверка…';
-
       try {
-        // Загружаем и данные, и ключи
-        const [data, keys] = await Promise.all([fetchData(), fetchKeys()]);
-
-        // Ищем ключ в списке
-        const found = keys.find(k => k.code.toUpperCase() === code);
+        var resp = await fetch('keys.json?t=' + Date.now());
+        var keysData = await resp.json();
+        var found = keysData.keys.find(function(k) { return k.code.toUpperCase() === key; });
 
         if (!found) {
           errEl.textContent = 'Ключ не найден. Проверьте правильность ввода.';
-          btn.disabled = false;
-          btn.textContent = 'Активировать';
+          errEl.style.display = 'block';
           return;
         }
 
-        if (!isKeyValid(found)) {
-          errEl.textContent = 'Срок действия ключа истёк. Обратитесь к администратору.';
-          btn.disabled = false;
-          btn.textContent = 'Активировать';
+        var now = new Date();
+        var exp = new Date(found.expires);
+        if (exp < now) {
+          errEl.textContent = 'Срок действия ключа истёк ' + exp.toLocaleDateString('ru-RU') + '.';
+          errEl.style.display = 'block';
           return;
         }
 
-        // Ключ валиден — сохраняем и открываем приложение
-        appData = data;
-        activeKey = found;
-        localStorage.setItem('hastambu_key', code);
-        localStorage.setItem('hastambu_version', data.version || '');
+        accessInfo = found;
+        localStorage.setItem('hastambu_key', key);
 
-        openApp();
-
+        showApp();
       } catch (e) {
-        console.error(e);
-        errEl.textContent = 'Ошибка загрузки. Проверьте интернет-соединение.';
-      } finally {
-        btn.disabled = false;
-        btn.textContent = 'Активировать';
+        errEl.textContent = 'Ошибка проверки ключа. Проверьте интернет.';
+        errEl.style.display = 'block';
       }
     }
 
-    // ==========================================
-    //  ОТКРЫТИЕ ПРИЛОЖЕНИЯ
-    // ==========================================
-    function openApp() {
+    function showApp() {
       document.getElementById('activation-screen').style.display = 'none';
-      document.getElementById('app-screen').style.display = 'block';
+      document.getElementById('app-screen').classList.add('active');
 
-      // Показываем информацию о подписке
-      const subInfo = document.getElementById('sub-info');
-      if (activeKey && activeKey.expires) {
-        subInfo.textContent = 'Доступ до ' + formatDateRu(activeKey.expires);
-      }
+      var daysLeft = Math.ceil((new Date(accessInfo.expires) - new Date()) / (1000 * 60 * 60 * 24));
+      document.getElementById('user-info').textContent =
+        'Подписка: ' + accessInfo.label + '\nОсталось: ' + daysLeft + ' дн.';
 
-      // Заполняем список ЖК
-      fillComplexList();
+      loadData();
     }
 
-    // ==========================================
-    //  ЗАПОЛНЕНИЕ СПИСКА ЖК
-    // ==========================================
-    function fillComplexList() {
-      const select = document.getElementById('select-complex');
-      select.innerHTML = '<option value="">— Выбрать ЖК —</option>';
+    // ============ ЗАГРУЗКА ДАННЫХ ============
+    async function loadData() {
+      try {
+        var resp = await fetch('data.json?t=' + Date.now());
+        hastambuData = await resp.json();
 
-      if (!appData || !appData.complexes) return;
+        var localVersion = localStorage.getItem('hastambu_version') || '';
+        if (hastambuData.version !== localVersion) {
+          localStorage.setItem('hastambu_version', hastambuData.version);
+          showUpdateBanner('Тарифы обновлены. Расчёты теперь по новым ценам.');
+        }
 
-      appData.complexes.forEach(c => {
-        const opt = document.createElement('option');
+        fillComplexSelect();
+      } catch (e) {
+        showToast('Не удалось загрузить данные. Проверьте интернет.');
+      }
+    }
+
+    function fillComplexSelect() {
+      var sel = document.getElementById('complex-select');
+      sel.innerHTML = '';
+      hastambuData.complexes.forEach(function(c) {
+        var opt = document.createElement('option');
         opt.value = c.id;
         opt.textContent = c.name;
-        select.appendChild(opt);
+        sel.appendChild(opt);
       });
     }
 
-    // ==========================================
-    //  РАСЧЁТ
-    // ==========================================
-    function calculate() {
-      const complexId = document.getElementById('select-complex').value;
-      const area = parseFloat(document.getElementById('input-area').value);
-
-      if (!complexId) {
-        showToast('Выберите жилой комплекс', 'warning');
-        return;
-      }
-      if (!area || area <= 0) {
-        showToast('Введите площадь квартиры', 'warning');
-        return;
-      }
-
-      const complex = appData.complexes.find(c => c.id === complexId);
-      if (!complex) {
-        showToast('ЖК не найден в данных', 'error');
-        return;
-      }
-
-      const pricePerSqm = complex.basePricePerSqm;
-      const total = area * pricePerSqm;
-
-      // Показываем результат
-      const card = document.getElementById('result-card');
-      const body = document.getElementById('result-body');
-      const title = document.getElementById('result-title');
-
-      title.textContent = 'Расчёт: ' + complex.name;
-
-      body.innerHTML = `
-        <div class="result-row">
-          <span class="label">Площадь</span>
-          <span class="value">${area.toFixed(1)} м²</span>
-        </div>
-        <div class="result-row">
-          <span class="label">Цена за м²</span>
-          <span class="value">${pricePerSqm.toLocaleString('ru-RU')} руб</span>
-        </div>
-        <div class="result-highlight">
-          <div class="label">Стоимость квартиры</div>
-          <div class="value">${total.toLocaleString('ru-RU')} руб</div>
-        </div>
-      `;
-
-      card.style.display = 'block';
-      card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-
-    // ==========================================
-    //  ПРИНУДИТЕЛЬНОЕ ОБНОВЛЕНИЕ ДАННЫХ
-    // ==========================================
+    // ============ ПРИНУДИТЕЛЬНОЕ ОБНОВЛЕНИЕ ============
     async function forceRefreshData() {
-      const btn = document.getElementById('btn-refresh');
-      const originalText = btn.textContent;
+      var btn = document.getElementById('btn-refresh');
+      var origText = btn.textContent;
       btn.disabled = true;
-      btn.textContent = '⏳ Загрузка…';
+      btn.textContent = 'Загрузка…';
 
       try {
-        const remote = await fetchData();
-        const localVersion = localStorage.getItem('hastambu_version') || '';
-        const remoteVersion = remote.version || '';
+        var resp = await fetch('data.json?t=' + Date.now());
+        var remote = await resp.json();
 
-        if (remoteVersion !== localVersion) {
-          // Версия изменилась — обновляем
-          localStorage.setItem('hastambu_version', remoteVersion);
-          appData = remote;
-          fillComplexList();
-          showToast('✅ Тарифы обновлены. Расчёты — по новым ценам', 'success');
+        var localVersion = localStorage.getItem('hastambu_version') || '';
+
+        if (remote.version !== localVersion) {
+          localStorage.setItem('hastambu_version', remote.version);
+          hastambuData = remote;
+          fillComplexSelect();
+          showUpdateBanner('Тарифы обновлены. Расчёты теперь по новым ценам.');
         } else {
-          showToast('Условия актуальны. Цены не менялись.', 'success');
+          showToast('Условия актуальны. Цены не менялись.');
         }
       } catch (e) {
-        console.error(e);
-        showToast('Не удалось загрузить условия. Проверьте интернет.', 'error');
+        showToast('Не удалось загрузить условия. Проверьте интернет.');
       } finally {
         btn.disabled = false;
-        btn.textContent = originalText;
+        btn.textContent = origText;
       }
     }
 
-    // ==========================================
-    //  ВЫХОД / СМЕНА КЛЮЧА
-    // ==========================================
-    function logout() {
-      if (confirm('Выйти и сменить ключ доступа?')) {
-        localStorage.removeItem('hastambu_key');
-        localStorage.removeItem('hastambu_version');
-        location.reload();
-      }
+    function showUpdateBanner(msg) {
+      var banner = document.getElementById('update-banner');
+      banner.textContent = msg;
+      banner.classList.add('show');
+      setTimeout(function() { banner.classList.remove('show'); }, 5000);
     }
 
-    // ==========================================
-    //  ИНИЦИАЛИЗАЦИЯ ПРИ ЗАГРУЗКЕ
-    // ==========================================
-    async function init() {
-      // Регистрация Service Worker (для PWA — иконка на рабочем столе)
-      if ('serviceWorker' in navigator) {
-        try {
-          await navigator.serviceWorker.register('sw.js');
-        } catch (e) {
-          console.warn('Service Worker не зарегистрирован:', e);
-        }
+    // ============ РАСЧЁТ ============
+    function calculate() {
+      if (!hastambuData) {
+        showToast('Данные ещё не загрузились. Подождите.');
+        return;
       }
 
-      // Проверяем, есть ли сохранённый ключ
-      const savedKey = localStorage.getItem('hastambu_key');
-      if (!savedKey) return;
-
-      // Есть ключ — пробуем автоматически войти
-      try {
-        const [data, keys] = await Promise.all([fetchData(), fetchKeys()]);
-        const found = keys.find(k => k.code.toUpperCase() === savedKey.toUpperCase());
-
-        if (found && isKeyValid(found)) {
-          appData = data;
-          activeKey = found;
-
-          // Проверяем, обновилась ли версия данных
-          const localVersion = localStorage.getItem('hastambu_version') || '';
-          const remoteVersion = data.version || '';
-
-          localStorage.setItem('hastambu_version', remoteVersion);
-          openApp();
-
-          // Если версия новая — показываем баннер
-          if (remoteVersion !== localVersion) {
-            setTimeout(() => {
-              showToast('✅ Тарифы обновлены. Расчёты — по новым ценам', 'success');
-            }, 600);
-          }
-        } else {
-          // Ключ истёк — очищаем
-          localStorage.removeItem('hastambu_key');
-          localStorage.removeItem('hastambu_version');
-          document.getElementById('activation-error').textContent = 'Срок действия ключа истёк. Обратитесь к администратору.';
-        }
-      } catch (e) {
-        console.warn('Автовход не удался:', e);
+      var area = parseFloat(document.getElementById('area-input').value);
+      if (!area || area <= 0) {
+        showToast('Введите площадь квартиры');
+        return;
       }
+
+      var complexId = document.getElementById('complex-select').value;
+      var complex = hastambuData.complexes.find(function(c) { return c.id === complexId; });
+      if (!complex) {
+        showToast('Выберите жилой комплекс');
+        return;
+      }
+
+      var totalPrice = area * complex.basePricePerSqm;
+      var formattedPrice = totalPrice.toLocaleString('ru-RU') + ' руб';
+      var formattedPerSqm = complex.basePricePerSqm.toLocaleString('ru-RU') + ' руб/м²';
+
+      document.getElementById('result-price').textContent = formattedPrice;
+      document.getElementById('result-per-sqm').textContent = formattedPerSqm;
+      document.getElementById('result-complex').textContent = complex.name;
+      document.getElementById('result-area').textContent = area + ' м²';
+      document.getElementById('result-base-price').textContent = formattedPerSqm;
+      document.getElementById('result-version').textContent = hastambuData.version;
+
+      document.getElementById('result-card').classList.add('show');
     }
 
-    // Запуск
-    init();
+    // ============ TOAST ============
+    function showToast(msg) {
+      var toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(function() { toast.classList.remove('show'); }, 3500);
+    }
 
-    // ==========================================
-    //  OneSignal (пуш-уведомления)
-    //  Раскомментируй, когда зарегистрируешься на onesignal.com
-    //  Замени YOUR_APP_ID на свой ID
-    // ==========================================
-    /*
-    window.OneSignal = window.OneSignal || [];
-    OneSignal.push(function() {
-      OneSignal.init({
-        appId: "YOUR_APP_ID",
-        notifyButton: { enable: true }
+    // ============ АВТОВХОД ============
+    (function() {
+      var savedKey = localStorage.getItem('hastambu_key');
+      if (savedKey) {
+        // Проверяем, не истёк ли
+        fetch('keys.json?t=' + Date.now())
+          .then(function(r) { return r.json(); })
+          .then(function(data) {
+            var found = data.keys.find(function(k) { return k.code.toUpperCase() === savedKey; });
+            if (found) {
+              var exp = new Date(found.expires);
+              if (exp >= new Date()) {
+                accessInfo = found;
+                showApp();
+                return;
+              }
+            }
+            localStorage.removeItem('hastambu_key');
+          })
+          .catch(function() {});
+      }
+    })();
+
+    // ============ SERVICE WORKER ============
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('sw.js').catch(function(e) {
+          console.log('SW registration failed:', e);
+        });
       });
-    });
-    var oneSignalScript = document.createElement('script');
-    oneSignalScript.src = "https://cdn.onesignal.com/sdks/OneSignalSDK.js";
-    oneSignalScript.async = true;
-    document.head.appendChild(oneSignalScript);
-    */
+    }
+
+    // // ============ ONESIGNAL (РАСКОММЕНТИРОВАТЬ ПОСЛЕ РЕГИСТРАЦИИ) ============
+    // window.OneSignal = window.OneSignal || [];
+    // OneSignal.push(function() {
+    //   OneSignal.init({
+    //     appId: "ТВОЙ_ONESIGNAL_APP_ID",
+    //   });
+    // });
   </script>
 </body>
 </html>
