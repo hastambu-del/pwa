@@ -1,10 +1,10 @@
 {
-  "version": "2026-10-04",
+  "version": "2026-10-05",
   "complexes": [
     {
       "id": "hastambu",
       "name": "ЖК ХАСТАМБУ",
-      "pricePerSqm": 99
+      "pricePerSqm": 99999
     }
   ]
 }
